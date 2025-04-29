@@ -67,11 +67,23 @@ class Board {
              if (MainBoard[0][2] == MainBoard[1][1] && MainBoard[1][1] == MainBoard[2][0] && MainBoard[0][2] != ' ') {
                 winner = MainBoard[0][2];
                 return true;
-            }  if (spaceCheck == 9) {
+            }  
+            bool isFull = true;
+
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    if (MainBoard[i][j] == ' ') {
+                        isFull = false;
+                        break;
+                    }
+                }
+                if (!isFull) break;
+            }
+            if (isFull) {
                 winner = 'D';
                 return true;
             }
-            else return false;
+             return false;
         }
 
     void resetBoard() {
@@ -123,6 +135,10 @@ class Board {
         return winner;
     }
 
+    void setWinner(char value) {
+        winner = value;
+    }
+
 
 
   private:
@@ -148,19 +164,23 @@ class AI {
 
         int evaluate(Board &evalboard) {
                 if (evalboard.getWinner() == 'X') {
+                    std::cout << "Board resulted in win" << std::endl;
                     return 10;
                 }
                 else if (evalboard.getWinner() == 'O') {
+                    std::cout << "Board resulted in loss" << std::endl;
                     return -10;
             } else if (evalboard.getWinner() == 'D') {
+                std::cout << "Board resulted in draw" << std::endl;
                 return 0;
-            }
+            } else return 20;
         
         }
 
         int minimax(Board &board,  bool maximizingPlayer) {
             //base case e.g if we are on a winning condition
-            if (board.checkWin()) {
+            bool isWon = board.checkWin();
+            if (isWon) {
                 return evaluate(board);
             }
 
@@ -212,6 +232,8 @@ class AI {
                     }
                 }
             }
+            std::cout << "the best score of each immediate move is: " << bestScore << std::endl;
+            std::cout << bestpossibleMove.first << bestpossibleMove.second << std::endl;
             return bestpossibleMove;
         }
 

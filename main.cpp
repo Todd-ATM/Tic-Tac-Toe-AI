@@ -1,4 +1,6 @@
 #include <iostream>
+#include <ctime>
+#include <cstdlib>
 
 class Board {
   public:
@@ -35,17 +37,17 @@ class Board {
                             MainBoard[row][col] = playerO;
                             checked[row][col] = true;
                         }
+                        spaceCheck++;
         }
     }
 
-    bool checkWin(int &spaceChecker) {
+    bool checkWin() {
         char winner;
         //check rows
         for (int i = 0; i < Row; i++) {
             if (MainBoard[i][0] == MainBoard[i][1] && MainBoard[i][1] == MainBoard[i][2] && MainBoard[i][0] != ' ') {
                 winner = MainBoard[i][0];
                 std::cout << winner << ": Won the game" << std::endl;
-                spaceChecker = 0;
                 return true;
             }
         }
@@ -54,7 +56,6 @@ class Board {
             if (MainBoard[0][i] == MainBoard[1][i] && MainBoard[1][i] == MainBoard[2][i] && MainBoard[0][i] != ' ') {
                 winner = MainBoard[0][i];
                 std::cout << winner << ": Won the game" << std::endl;
-                spaceChecker = 0;
                 return true;
             }
         }
@@ -63,18 +64,16 @@ class Board {
              if (MainBoard[0][0] == MainBoard[1][1] && MainBoard[1][1] == MainBoard[2][2] && MainBoard[0][0] != ' ') {
                 winner = MainBoard[0][0];
                 std::cout << winner << ": Won the game" << std::endl;
-                spaceChecker = 0;
                 return true;
             }
             //last diagonal
              if (MainBoard[0][2] == MainBoard[1][1] && MainBoard[1][1] == MainBoard[2][0] && MainBoard[0][2] != ' ') {
                 winner = MainBoard[0][2];
                 std::cout << winner << ": Won the game" << std::endl;
-                spaceChecker = 0;
                 return true;
-            }  if (spaceChecker == 9) {
+            }  if (spaceCheck == 9) {
                 std::cout << "TIE. " << std::endl;
-                spaceChecker = 0;
+                spaceCheck = 0;
                 return true;
             }
             else return false;
@@ -88,6 +87,7 @@ class Board {
             for (int j = 0; j < Col; j++) {
                 MainBoard[i][j] = value;
                 checked[i][j] = false;
+                spaceCheck = 0;
             }
         }
 
@@ -108,6 +108,10 @@ class Board {
         return false;
     }
 
+    char getCell(int row, int col) {
+        return MainBoard[row][col];
+    }
+
 
   private:
     int Row = 3;
@@ -116,15 +120,21 @@ class Board {
     const char playerX = 'X';
     const char playerO = 'O';
     bool CurrentPlayer = false;
+    int spaceCheck = 0;
     //identical to mainboard but at each element, adds checked bool for true
+};
+
+class AI {
+    public:
+        void placeHolder() {
+            std::cout << "This is a placeholder";
+        }
 };
 
 int main() {
     Board main;
     bool CurrentTurn = false; //who's turn is it currently, False = O's
     bool isPlaying = true;
-    char FinalDec;
-    int spaceChecker = 0;
 
     //opening message 
     std::cout << "# Welcome to Tic Tac Toe ! " << std::endl;
@@ -141,7 +151,7 @@ int main() {
         bool WinStatus;
 
         //call wincheck everytime we restart
-        WinStatus = main.checkWin(spaceChecker);
+        WinStatus = main.checkWin();
 
         if (WinStatus) {
             char FinalDec;
@@ -186,10 +196,6 @@ int main() {
         }
         if (CurrentTurn == false) {
             std::cout << "O's Turn" << std::endl;
-        }
-        if (CurrentTurn == true) {
-            std::cout << "X's Turn" << std::endl;
-        }
             std::cout << "Enter Row Number(1-3) -> ";
             std::cin >> rowDec;
             //exception handling
@@ -231,9 +237,9 @@ int main() {
                 colDec = colDec - 1;
                 if (next == '\n' && !main.checked[rowDec][colDec]) {
                     main.MovePiece(rowDec, colDec);
-                    spaceChecker++;
                     main.DrawBoard();
                     CurrentTurn = main.change();
+                    continue;
                 } else {
                     std::cin.ignore(100, '\n'); //flush bad input
                     std::cout << "Please enter valid Col Number. Retry" << std::endl;
@@ -243,6 +249,27 @@ int main() {
                 std::cout << "Invalid Try again" << std::endl;
                 continue;
             }
+        }
+        if (CurrentTurn == true) {
+            while (CurrentTurn) {
+                srand(time(0));
+                std::cout << "AI's Turn" << std::endl;
+                int randRow = rand() % 3;
+                int randCol = rand() % 3; 
+                std::cout << "AI generated randRow: " << randRow << std::endl;
+                std::cout << "AI generated randCol: " << randCol << std::endl;
+                if (!main.checked[randRow][randCol]) {
+                    main.MovePiece(randRow, randCol);
+                    main.DrawBoard();
+                    CurrentTurn = main.change();
+                    continue;
+                } else continue;
+    
+
+            }
+
+            
+        }
         }
         std::cout << "Thanks for playing. ";
     }

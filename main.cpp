@@ -1,6 +1,7 @@
 #include <iostream>
 #include <ctime>
 #include <cstdlib>
+#include <cmath>
 
 class Board {
   public:
@@ -42,12 +43,10 @@ class Board {
     }
 
     bool checkWin() {
-        char winner;
         //check rows
         for (int i = 0; i < Row; i++) {
             if (MainBoard[i][0] == MainBoard[i][1] && MainBoard[i][1] == MainBoard[i][2] && MainBoard[i][0] != ' ') {
                 winner = MainBoard[i][0];
-                std::cout << winner << ": Won the game" << std::endl;
                 return true;
             }
         }
@@ -55,7 +54,6 @@ class Board {
             //check col
             if (MainBoard[0][i] == MainBoard[1][i] && MainBoard[1][i] == MainBoard[2][i] && MainBoard[0][i] != ' ') {
                 winner = MainBoard[0][i];
-                std::cout << winner << ": Won the game" << std::endl;
                 return true;
             }
         }
@@ -63,17 +61,14 @@ class Board {
             //first diagonal
              if (MainBoard[0][0] == MainBoard[1][1] && MainBoard[1][1] == MainBoard[2][2] && MainBoard[0][0] != ' ') {
                 winner = MainBoard[0][0];
-                std::cout << winner << ": Won the game" << std::endl;
                 return true;
             }
             //last diagonal
              if (MainBoard[0][2] == MainBoard[1][1] && MainBoard[1][1] == MainBoard[2][0] && MainBoard[0][2] != ' ') {
                 winner = MainBoard[0][2];
-                std::cout << winner << ": Won the game" << std::endl;
                 return true;
             }  if (spaceCheck == 9) {
-                std::cout << "TIE. " << std::endl;
-                spaceCheck = 0;
+                winner = 'D';
                 return true;
             }
             else return false;
@@ -87,11 +82,10 @@ class Board {
             for (int j = 0; j < Col; j++) {
                 MainBoard[i][j] = value;
                 checked[i][j] = false;
-                spaceCheck = 0;
             }
         }
-
-        //reset checked board's values
+        spaceCheck = 0;
+        winner = ' ';
     }
 
     //basic changer
@@ -112,6 +106,24 @@ class Board {
         return MainBoard[row][col];
     }
 
+    void setCell (int row, int col, char value) {
+        MainBoard[row][col] = value;
+        if (value == 'X') {
+            spaceCheck++;
+        } else if (value == 'O') {
+            spaceCheck++;
+        }
+    }
+
+    int getSpaceCheck() {
+        return spaceCheck;
+    }
+
+    char getWinner() {
+        return winner;
+    }
+
+
 
   private:
     int Row = 3;
@@ -119,8 +131,10 @@ class Board {
     char MainBoard[3][3];
     const char playerX = 'X';
     const char playerO = 'O';
+
     bool CurrentPlayer = false;
     int spaceCheck = 0;
+    char winner;
     //identical to mainboard but at each element, adds checked bool for true
 };
 
@@ -129,12 +143,88 @@ class AI {
         void placeHolder() {
             std::cout << "This is a placeholder";
         }
+
+
+
+        int evaluate(Board &evalboard) {
+                if (evalboard.getWinner() == 'X') {
+                    return 10;
+                }
+                else if (evalboard.getWinner() == 'O') {
+                    return -10;
+            } else if (evalboard.getWinner() == 'D') {
+                return 0;
+            }
+        
+        }
+
+        int minimax(Board &board,  bool maximizingPlayer) {
+            //base case e.g if we are on a winning condition
+            if (board.checkWin()) {
+                return evaluate(board);
+            }
+
+            if (maximizingPlayer) {
+                int bestScore = -1000;
+                int score;
+                for (int i = 0; i < 3; i++) {
+                    for (int j = 0; j < 3; j++) {
+                        if (board.getCell(i, j) == ' ') {
+                            board.setCell(i, j, 'X');
+                            score = minimax(board, false);
+                            bestScore = std::max(bestScore, score);
+                            board.setCell(i, j, ' ');
+                        }
+                    }
+                }
+                return bestScore;
+            } else {
+                int bestScore = +1000;
+                int score;
+                for (int i = 0; i < 3; i++) {
+                    for (int j = 0; j < 3; j++) {
+                        if (board.getCell(i, j) == ' ') {
+                            board.setCell(i, j, 'O');
+                            score = minimax(board, true);
+                            bestScore = std::min(bestScore, score);
+                            board.setCell(i, j, ' ');
+                        }
+                    }
+                }
+                return bestScore;
+            }
+        }
+
+        std::pair<int, int> bestMove(Board &AIBoard) {
+            int bestScore = -1000;
+            int score;
+            std::pair<int, int> bestpossibleMove;
+            for (int i = 0; i < 3; i++) {
+                for (int j =0; j < 3; j++) {
+                    if (AIBoard.getCell(i, j) == ' ') {
+                        AIBoard.setCell(i, j, 'X');
+                        score = minimax(AIBoard, false);
+                        AIBoard.setCell(i, j, ' ');
+                        if (score > bestScore) {
+                            bestScore = score;
+                            bestpossibleMove = {i, j};
+                        }
+                    }
+                }
+            }
+            return bestpossibleMove;
+        }
+
+
+        private:
+
 };
 
 int main() {
     Board main;
-    bool CurrentTurn = false; //who's turn is it currently, False = O's
+    bool CurrentTurn = false; //who's turn is it currently, False = O's True = X's
     bool isPlaying = true;
+    AI opponent;
 
     //opening message 
     std::cout << "# Welcome to Tic Tac Toe ! " << std::endl;
@@ -154,6 +244,12 @@ int main() {
         WinStatus = main.checkWin();
 
         if (WinStatus) {
+            if (main.getWinner() == 'D') {
+                std::cout << "TIE. " << std::endl;
+            }
+            else {
+                std::cout << main.getWinner() << ": Won the game" << std::endl;
+            }
             char FinalDec;
             std::cout << "Would you like to try again?" << std::endl;
             std::cout << "Y | N" << std::endl;
@@ -251,24 +347,10 @@ int main() {
             }
         }
         if (CurrentTurn == true) {
-            while (CurrentTurn) {
-                srand(time(0));
-                std::cout << "AI's Turn" << std::endl;
-                int randRow = rand() % 3;
-                int randCol = rand() % 3; 
-                std::cout << "AI generated randRow: " << randRow << std::endl;
-                std::cout << "AI generated randCol: " << randCol << std::endl;
-                if (!main.checked[randRow][randCol]) {
-                    main.MovePiece(randRow, randCol);
-                    main.DrawBoard();
-                    CurrentTurn = main.change();
-                    continue;
-                } else continue;
-    
-
-            }
-
-            
+            std::pair<int, int> coords = opponent.bestMove(main);
+            main.MovePiece(coords.first, coords.second);
+            main.DrawBoard();
+            CurrentTurn = main.change();
         }
         }
         std::cout << "Thanks for playing. ";

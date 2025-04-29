@@ -96,7 +96,6 @@ class Board {
             }
         }
         winner = ' ';
-        CurrentPlayer = true; // make X go first on every restart
     }
 
     //basic changer
@@ -139,7 +138,7 @@ class Board {
     const char playerX = 'X';
     const char playerO = 'O';
 
-    bool CurrentPlayer = false;
+    bool CurrentPlayer = true;
     char winner;
     //identical to mainboard but at each element, adds checked bool for true
 };
@@ -155,7 +154,6 @@ class AI {
 
                     return -10;
             } else if (evalboard.getWinner() == 'D') {
-
                 return 0;
             } else return 20;
         
@@ -235,6 +233,8 @@ int main() {
     std::cout << std::endl;
     std::cout << "This is a starter project to showcase a bit of Object Oriented Programming with " << std::endl;
     std::cout << "a board class, as well user input validation, and game logic" << std::endl;
+    std::cout << "You will play against an AI opponent that uses the minimax algorithm to pick the" << std::endl;
+    std::cout << "Best Possible move" << std::endl;
     std::cout << std::endl;
     //main game loop
     while (isPlaying) {
@@ -275,7 +275,6 @@ int main() {
                 if (FinalDec == 'Y') {
                     std::cout << "You chose to play again. " << std::endl;
                     main.resetBoard();
-                    CurrentTurn = true; //X goes first
                     continue;
                 } 
                  if (FinalDec == 'N') {

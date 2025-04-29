@@ -38,7 +38,6 @@ class Board {
                             MainBoard[row][col] = playerO;
                             checked[row][col] = true;
                         }
-                        spaceCheck++;
         }
     }
 
@@ -96,8 +95,8 @@ class Board {
                 checked[i][j] = false;
             }
         }
-        spaceCheck = 0;
         winner = ' ';
+        CurrentPlayer = true; // make X go first on every restart
     }
 
     //basic changer
@@ -120,16 +119,8 @@ class Board {
 
     void setCell (int row, int col, char value) {
         MainBoard[row][col] = value;
-        if (value == 'X') {
-            spaceCheck++;
-        } else if (value == 'O') {
-            spaceCheck++;
-        }
     }
 
-    int getSpaceCheck() {
-        return spaceCheck;
-    }
 
     char getWinner() {
         return winner;
@@ -149,19 +140,12 @@ class Board {
     const char playerO = 'O';
 
     bool CurrentPlayer = false;
-    int spaceCheck = 0;
     char winner;
     //identical to mainboard but at each element, adds checked bool for true
 };
 
 class AI {
     public:
-        void placeHolder() {
-            std::cout << "This is a placeholder";
-        }
-
-
-
         int evaluate(Board &evalboard) {
                 if (evalboard.getWinner() == 'X') {
 
@@ -242,7 +226,7 @@ class AI {
 
 int main() {
     Board main;
-    bool CurrentTurn = false; //who's turn is it currently, False = O's True = X's
+    bool CurrentTurn = true; //who's turn is it currently, False = O's True = X's
     bool isPlaying = true;
     AI opponent;
 
@@ -252,7 +236,6 @@ int main() {
     std::cout << "This is a starter project to showcase a bit of Object Oriented Programming with " << std::endl;
     std::cout << "a board class, as well user input validation, and game logic" << std::endl;
     std::cout << std::endl;
-    main.DrawBoard();
     //main game loop
     while (isPlaying) {
         int rowDec, colDec;
@@ -292,6 +275,7 @@ int main() {
                 if (FinalDec == 'Y') {
                     std::cout << "You chose to play again. " << std::endl;
                     main.resetBoard();
+                    CurrentTurn = true; //X goes first
                     continue;
                 } 
                  if (FinalDec == 'N') {
@@ -367,6 +351,7 @@ int main() {
             }
         }
         if (CurrentTurn == true) {
+            std::cout << "AI's Turn" << std::endl;
             std::pair<int, int> coords = opponent.bestMove(main);
             main.MovePiece(coords.first, coords.second);
             main.DrawBoard();
